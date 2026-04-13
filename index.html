@@ -448,15 +448,14 @@ async function startEnrich() {
 }
 
 async function callAI(product) {
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 400,
-      messages: [{
-        role: 'user',
-        content: `Sos un experto en ecommerce latinoamericano. Para el siguiente producto, devolvé SOLO un JSON válido (sin markdown, sin texto extra) con:
+  try {
+    const response = await fetch('/api/proxy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [{
+          role: 'user',
+          content: `Sos un experto en ecommerce latinoamericano. Para el siguiente producto, devolvé SOLO un JSON válido (sin markdown, sin texto extra) con:
 - "categoria": categoría > subcategoría en español (ej: "Tecnología > Monitores")
 - "descripcion": descripción de venta en español, 2 frases, orientada al cliente, persuasiva
 - "tags": array de 4-5 palabras clave SEO en español
@@ -465,13 +464,16 @@ Producto: ${product.nombre}
 SKU: ${product.sku}
 Descripción actual: ${product.desc}
 Precio: $${product.precio}`
-      }]
-    })
-  });
-  const data = await response.json();
-  const text = data.content.map(c => c.text || '').join('');
-  const clean = text.replace(/\`\`\`json|\`\`\`/g, '').trim();
-  return JSON.parse(clean);
+        }]
+      })
+    });
+    const data = await response.json();
+    const text = data.content[0].text;
+    const clean = text.replace(/\`\`\`json|\`\`\`/g, '').trim();
+    return JSON.parse(clean);
+  } catch(e) {
+    throw new Error(e.message);
+  }
 }
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
