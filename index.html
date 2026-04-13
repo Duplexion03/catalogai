@@ -6,6 +6,7 @@
 <title>CatalogAI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root {
   --bg: #0e0e11;
@@ -523,26 +524,150 @@ function goTab(name){
 // Upload
 var dropzone = document.getElementById('dropzone');
 var fileInput = document.getElementById('fileInput');
+var parsedProducts = [];
+
 dropzone.addEventListener('dragover', function(e){ e.preventDefault(); dropzone.classList.add('drag'); });
 dropzone.addEventListener('dragleave', function(){ dropzone.classList.remove('drag'); });
 dropzone.addEventListener('drop', function(e){ e.preventDefault(); dropzone.classList.remove('drag'); handleFile(e.dataTransfer.files[0]); });
 fileInput.addEventListener('change', function(e){ handleFile(e.target.files[0]); });
-dropzone.addEventListener('click', function(){ fileInput.click(); });
+dropzone.addEventListener('click', function(e){ if(e.target.tagName !== 'BUTTON') fileInput.click(); });
 
 function handleFile(file){
   if(!file) return;
   var ext = file.name.split('.').pop().toLowerCase();
-  if(!['csv','xlsx','xls'].includes(ext)){ alert('Formato no soportado'); return; }
+  if(!['csv','xlsx','xls'].includes(ext)){ alert('Formato no soportado. Usá .xlsx, .xls o .csv'); return; }
+
   var reader = new FileReader();
   reader.onload = function(e){
-    var rows = e.target.result.split('\n').filter(function(r){ return r.trim(); });
-    var headers = rows[0].split(',').map(function(h){ return h.trim().replace(/"/g,''); });
-    showMapping(headers);
+    try {
+      if(ext === 'csv'){
+        parseCsv(e.target.result);
+      } else {
+        parseXlsx(e.target.result);
+      }
+    } catch(err) {
+      alert('Error leyendo el archivo: ' + err.message);
+    }
   };
-  reader.readAsText(file);
+
+  if(ext === 'csv'){
+    reader.readAsText(file);
+  } else {
+    reader.readAsArrayBuffer(file);
+  }
 }
 
-function showMapping(headers){
+function parseCsv(text){
+  var rows = text.split('\n').filter(function(r){ return r.trim(); });
+  var headers = rows[0].split(',').map(function(h){ return h.trim().replace(/"/g,''); });
+  var data = [];
+  for(var i=1; i<rows.length; i++){
+    var cells = rows[i].split(',').map(function(c){ return c.trim().replace(/"/g,''); });
+    var obj = {};
+    headers.forEach(function(h,idx){ obj[h] = cells[idx] || ''; });
+    data.push(obj);
+  }
+  showMapping(headers, data);
+}
+
+function parseXlsx(buffer){
+  var wb = XLSX.read(buffer, {type:'arraybuffer'});
+
+  // Detectar si es formato multi-hoja tipo lista de precios (Bunker style)
+  // Busca la fila de headers en cada hoja (contiene "Código" o "Descripcion")
+  var allProducts = [];
+  var id = 1;
+
+  wb.SheetNames.forEach(function(sheetName){
+    if(sheetName === 'CLIENTES') return; // hoja de condiciones, no productos
+    var ws = wb.Sheets[sheetName];
+    var rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+
+    // Buscar la fila header (la que tiene "Código" o "Descripcion")
+    var headerIdx = -1;
+    for(var i=0; i<rows.length; i++){
+      var row = rows[i];
+      var hasCode = row.some(function(c){ return String(c).toLowerCase().includes('código') || String(c).toLowerCase() === 'codigo'; });
+      var hasDesc = row.some(function(c){ return String(c).toLowerCase().includes('descripcion') || String(c).toLowerCase().includes('descripción'); });
+      if(hasCode || hasDesc){ headerIdx = i; break; }
+    }
+    if(headerIdx === -1) return;
+
+    var headers = rows[headerIdx].map(function(h){ return String(h).trim(); });
+    var codigoIdx = headers.findIndex(function(h){ return h.toLowerCase().includes('código') || h.toLowerCase() === 'codigo'; });
+    var descIdx = headers.findIndex(function(h){ return h.toLowerCase().includes('descrip'); });
+    var marcaIdx = headers.findIndex(function(h){ return h.toLowerCase().includes('marca'); });
+    var precioIdx = headers.findIndex(function(h){ return h.toLowerCase().includes('gremio') || h.toLowerCase().includes('precio') || h.toLowerCase().includes('oferta'); });
+    var stockIdx = headers.findIndex(function(h){ return h.toLowerCase().includes('stock'); });
+
+    for(var j=headerIdx+1; j<rows.length; j++){
+      var row = rows[j];
+      var sku = codigoIdx >= 0 ? String(row[codigoIdx]||'').trim() : '';
+      var nombre = descIdx >= 0 ? String(row[descIdx]||'').trim() : '';
+      if(!sku && !nombre) continue;
+      if(sku === 'Código' || nombre === 'Descripcion') continue;
+
+      var precio = 0;
+      if(precioIdx >= 0){
+        var rawPrice = String(row[precioIdx]||'').replace(/[$,\s]/g,'');
+        precio = parseFloat(rawPrice) || 0;
+      }
+
+      allProducts.push({
+        id: id++,
+        nombre: nombre || sku,
+        sku: sku,
+        precio: precio,
+        categoria: sheetName,
+        marca: marcaIdx >= 0 ? String(row[marcaIdx]||'').trim() : '',
+        stock: stockIdx >= 0 ? String(row[stockIdx]||'').trim() : '',
+        status: 'pending',
+        img: null,
+        desc: nombre,
+        tags: []
+      });
+    }
+  });
+
+  if(!allProducts.length){
+    // Fallback: primera hoja como CSV plano
+    var ws = wb.Sheets[wb.SheetNames[0]];
+    var rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+    var headers = rows[0].map(function(h){ return String(h).trim(); });
+    showMapping(headers, null);
+    return;
+  }
+
+  // Mostrar resumen antes de importar
+  showXlsxPreview(allProducts, wb.SheetNames.filter(function(s){ return s!=='CLIENTES'; }));
+}
+
+function showXlsxPreview(prods, sheets){
+  parsedProducts = prods;
+  document.getElementById('mappingSection').style.display = 'block';
+  var html = '<div style="background:var(--bg4);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:12px;font-family:\'IBM Plex Mono\',monospace;font-size:11px;">';
+  html += '<div style="color:var(--green);margin-bottom:6px;font-weight:600;">&#10003; Archivo detectado: Lista de precios multi-hoja</div>';
+  html += '<div style="color:var(--text2);">Productos encontrados: <strong style="color:var(--text)">'+prods.length+'</strong></div>';
+  html += '<div style="color:var(--text2);">Categorías: <strong style="color:var(--text)">'+sheets.length+'</strong></div>';
+  html += '<div style="margin-top:8px;color:var(--text3);">'+sheets.slice(0,8).join(' · ')+(sheets.length>8?' · ...':'')+'</div>';
+  html += '</div>';
+  html += '<div style="font-size:12px;color:var(--text2);margin-bottom:4px;">Vista previa (primeros 3 productos):</div>';
+  html += '<table style="width:100%;font-size:11px;font-family:\'IBM Plex Mono\',monospace;border-collapse:collapse;">';
+  html += '<tr style="color:var(--text3);"><td style="padding:4px 6px;">Código</td><td style="padding:4px 6px;">Descripción</td><td style="padding:4px 6px;">Marca</td><td style="padding:4px 6px;">Precio</td><td style="padding:4px 6px;">Categoría</td></tr>';
+  prods.slice(0,3).forEach(function(p){
+    html += '<tr style="border-top:1px solid var(--border);">';
+    html += '<td style="padding:4px 6px;color:var(--accent)">'+p.sku+'</td>';
+    html += '<td style="padding:4px 6px;color:var(--text)">'+p.nombre.substring(0,40)+(p.nombre.length>40?'...':'')+'</td>';
+    html += '<td style="padding:4px 6px;color:var(--text2)">'+p.marca+'</td>';
+    html += '<td style="padding:4px 6px;color:var(--text2)">$'+p.precio+'</td>';
+    html += '<td style="padding:4px 6px;color:var(--text3)">'+p.categoria+'</td>';
+    html += '</tr>';
+  });
+  html += '</table>';
+  document.getElementById('mappingRows').innerHTML = html;
+}
+
+function showMapping(headers, data){
   document.getElementById('mappingSection').style.display = 'block';
   var html = '';
   FIELDS.forEach(function(f){
@@ -562,10 +687,21 @@ function showMapping(headers){
 
 function importProducts(){
   document.getElementById('mappingSection').style.display = 'none';
-  loadDemo();
+  if(parsedProducts.length){
+    products = parsedProducts;
+    parsedProducts = [];
+  } else {
+    loadDemo();
+    return;
+  }
+  renderProducts();
+  updateHeader();
+  updateExportSummary();
+  goTab('products');
 }
 function resetUpload(){
   document.getElementById('mappingSection').style.display = 'none';
+  parsedProducts = [];
   fileInput.value = '';
 }
 
