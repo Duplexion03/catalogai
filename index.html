@@ -1,523 +1,751 @@
-
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CatalogAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+:root {
+  --bg: #0e0e11;
+  --bg2: #17171c;
+  --bg3: #1e1e25;
+  --bg4: #26262f;
+  --border: #2e2e3a;
+  --border2: #3a3a48;
+  --text: #e8e8f0;
+  --text2: #9090a8;
+  --text3: #5a5a72;
+  --accent: #7c6fff;
+  --accent2: #5a4fff;
+  --green: #3ecf8e;
+  --green-bg: #0d2b1e;
+  --amber: #f5a623;
+  --amber-bg: #2a1f0a;
+  --red: #ff5757;
+  --red-bg: #2a0f0f;
+  --blue: #4da3ff;
+  --blue-bg: #0a1a2a;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+[data-theme="light"] {
+  --bg: #f4f4f7;
+  --bg2: #ffffff;
+  --bg3: #f0f0f5;
+  --bg4: #e8e8f0;
+  --border: #e0e0ea;
+  --border2: #c8c8d8;
+  --text: #1a1a2e;
+  --text2: #5a5a7a;
+  --text3: #9090aa;
+  --accent: #6c5fff;
+  --accent2: #4a3fff;
+  --green: #1a9e6e;
+  --green-bg: #e8f8f2;
+  --amber: #c47f0a;
+  --amber-bg: #fef8e8;
+  --red: #e03030;
+  --red-bg: #fef0f0;
+  --blue: #2278dd;
+  --blue-bg: #eef5ff;
+}
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: var(--font-sans); }
-.app { min-height: 600px; background: var(--color-background-tertiary); }
-.header { background: var(--color-background-primary); border-bottom: 0.5px solid var(--color-border-tertiary); padding: 14px 24px; display: flex; align-items: center; gap: 12px; }
-.logo { width: 32px; height: 32px; background: #2C2C2A; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
-.logo svg { width: 18px; height: 18px; fill: white; }
-.header h1 { font-size: 16px; font-weight: 500; color: var(--color-text-primary); }
-.header span { font-size: 12px; color: var(--color-text-secondary); background: var(--color-background-secondary); padding: 3px 8px; border-radius: 20px; border: 0.5px solid var(--color-border-tertiary); }
-.tabs { display: flex; gap: 0; border-bottom: 0.5px solid var(--color-border-tertiary); background: var(--color-background-primary); padding: 0 24px; }
-.tab { padding: 10px 16px; font-size: 13px; cursor: pointer; color: var(--color-text-secondary); border-bottom: 2px solid transparent; margin-bottom: -0.5px; }
-.tab.active { color: var(--color-text-primary); border-bottom-color: #2C2C2A; font-weight: 500; }
-.content { padding: 24px; }
+body {
+  font-family: 'Syne', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+}
+/* Header */
+.header {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.logo {
+  width: 28px; height: 28px;
+  background: var(--accent);
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+}
+.logo svg { width: 16px; height: 16px; fill: white; }
+.header-title { font-size: 15px; font-weight: 600; letter-spacing: -0.3px; }
+.badge-beta {
+  font-size: 10px; font-weight: 500;
+  background: var(--bg4); color: var(--text3);
+  padding: 2px 7px; border-radius: 20px;
+  border: 1px solid var(--border);
+  font-family: 'IBM Plex Mono', monospace;
+}
+.header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.header-count { font-size: 12px; color: var(--text3); font-family: 'IBM Plex Mono', monospace; }
+
+/* Theme toggle */
+.theme-btn {
+  width: 32px; height: 32px;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text2); font-size: 14px;
+  transition: background 0.2s;
+}
+.theme-btn:hover { background: var(--bg4); }
+
+/* Buttons */
+.btn {
+  padding: 7px 14px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border2);
+  background: var(--bg3); color: var(--text);
+  font-size: 12px; font-family: 'Syne', sans-serif;
+  cursor: pointer; font-weight: 500;
+  transition: all 0.15s;
+}
+.btn:hover { background: var(--bg4); border-color: var(--border2); }
+.btn-primary {
+  background: var(--accent); border-color: var(--accent);
+  color: white;
+}
+.btn-primary:hover { background: var(--accent2); border-color: var(--accent2); }
+.btn-sm { padding: 5px 10px; font-size: 11px; }
+
+/* Tabs */
+.tabs {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  display: flex; gap: 0;
+}
+.tab {
+  padding: 12px 18px; font-size: 12px; font-weight: 500;
+  cursor: pointer; color: var(--text3);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.15s;
+  letter-spacing: 0.2px;
+}
+.tab:hover { color: var(--text2); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* Content */
+.content { padding: 24px; max-width: 960px; margin: 0 auto; }
 .panel { display: none; }
 .panel.active { display: block; }
 
-/* Upload panel */
-.upload-zone { border: 1.5px dashed var(--color-border-secondary); border-radius: var(--border-radius-lg); padding: 40px; text-align: center; background: var(--color-background-primary); cursor: pointer; transition: border-color 0.2s; }
-.upload-zone:hover { border-color: #5F5E5A; }
-.upload-zone.drag { border-color: #2C2C2A; background: var(--color-background-secondary); }
-.upload-icon { width: 40px; height: 40px; margin: 0 auto 12px; background: var(--color-background-secondary); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
-.upload-zone h3 { font-size: 15px; font-weight: 500; margin-bottom: 6px; color: var(--color-text-primary); }
-.upload-zone p { font-size: 13px; color: var(--color-text-secondary); }
-.upload-zone p small { font-size: 11px; display: block; margin-top: 4px; }
-.btn { padding: 8px 16px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); color: var(--color-text-primary); font-size: 13px; cursor: pointer; }
-.btn:hover { background: var(--color-background-secondary); }
-.btn-dark { background: #2C2C2A; color: white; border-color: #2C2C2A; }
-.btn-dark:hover { background: #444441; }
-.btn-sm { padding: 5px 10px; font-size: 12px; }
-.mapping-section { margin-top: 20px; background: var(--color-background-primary); border-radius: var(--border-radius-lg); border: 0.5px solid var(--color-border-tertiary); padding: 16px; }
-.mapping-section h3 { font-size: 14px; font-weight: 500; margin-bottom: 12px; }
-.map-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 13px; }
-.map-label { background: var(--color-background-secondary); padding: 6px 10px; border-radius: var(--border-radius-md); color: var(--color-text-secondary); font-family: var(--font-mono); font-size: 12px; }
-.map-arrow { color: var(--color-text-tertiary); font-size: 12px; }
-.map-select { padding: 6px 10px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); color: var(--color-text-primary); font-size: 12px; width: 100%; }
+/* Upload zone */
+.upload-zone {
+  border: 1.5px dashed var(--border2);
+  border-radius: var(--radius);
+  padding: 48px 24px;
+  text-align: center;
+  background: var(--bg2);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.upload-zone:hover { border-color: var(--accent); background: var(--bg3); }
+.upload-zone.drag { border-color: var(--accent); background: var(--bg3); }
+.upload-icon {
+  width: 44px; height: 44px; margin: 0 auto 16px;
+  background: var(--bg4); border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border);
+}
+.upload-icon svg { width: 22px; height: 22px; stroke: var(--accent); }
+.upload-zone h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+.upload-zone p { font-size: 12px; color: var(--text2); }
+.upload-zone small { font-size: 11px; color: var(--text3); display: block; margin-top: 4px; font-family: 'IBM Plex Mono', monospace; }
 
-/* Products table */
+/* Info box */
+.info-box {
+  margin-top: 20px;
+  background: var(--bg2); border-radius: var(--radius);
+  border: 1px solid var(--border); padding: 16px;
+}
+.info-box h3 { font-size: 12px; font-weight: 600; margin-bottom: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+.tag-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag {
+  font-size: 11px; font-family: 'IBM Plex Mono', monospace;
+  background: var(--bg4); color: var(--text2);
+  padding: 4px 10px; border-radius: 20px;
+  border: 1px solid var(--border);
+}
+
+/* Mapping */
+.mapping-section {
+  margin-top: 16px; background: var(--bg2);
+  border-radius: var(--radius); border: 1px solid var(--border); padding: 16px;
+}
+.mapping-section h3 { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.mapping-section > p { font-size: 12px; color: var(--text2); margin-bottom: 14px; }
+.map-row { display: grid; grid-template-columns: 1fr 24px 1fr; align-items: center; gap: 8px; margin-bottom: 8px; }
+.map-label {
+  background: var(--bg4); padding: 7px 10px;
+  border-radius: var(--radius-sm); color: var(--text2);
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+  border: 1px solid var(--border);
+}
+.map-arrow { color: var(--text3); text-align: center; font-size: 12px; }
+.map-select {
+  padding: 7px 10px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border2);
+  background: var(--bg3); color: var(--text);
+  font-size: 11px; font-family: 'Syne', sans-serif; width: 100%;
+}
+.map-select:focus { outline: none; border-color: var(--accent); }
+.mapping-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+
+/* Cards */
+.card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px 16px;
+}
+
+/* Toolbar */
 .toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
-.toolbar input { flex: 1; padding: 8px 12px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); color: var(--color-text-primary); font-size: 13px; }
-.badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; }
-.badge-pending { background: #FAEEDA; color: #854F0B; }
-.badge-enriched { background: #EAF3DE; color: #3B6D11; }
-.badge-error { background: #FCEBEB; color: #A32D2D; }
-.badge-processing { background: #E6F1FB; color: #185FA5; }
+.search-input {
+  flex: 1; padding: 8px 12px;
+  border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: var(--bg2); color: var(--text);
+  font-size: 13px; font-family: 'Syne', sans-serif;
+}
+.search-input:focus { outline: none; border-color: var(--accent); }
+
+/* Product cards */
 .product-grid { display: flex; flex-direction: column; gap: 8px; }
-.product-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 12px 16px; display: grid; grid-template-columns: 48px 1fr auto; gap: 12px; align-items: center; }
-.product-card:hover { border-color: var(--color-border-secondary); }
-.product-img { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; background: var(--color-background-secondary); display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--color-text-tertiary); border: 0.5px solid var(--color-border-tertiary); overflow: hidden; }
+.product-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 12px 16px;
+  display: grid; grid-template-columns: 52px 1fr auto;
+  gap: 12px; align-items: center;
+  transition: border-color 0.15s;
+}
+.product-card:hover { border-color: var(--border2); }
+.product-img {
+  width: 52px; height: 52px; border-radius: 8px;
+  background: var(--bg4); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
 .product-img img { width: 100%; height: 100%; object-fit: cover; }
-.product-info h4 { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
-.product-info p { font-size: 12px; color: var(--color-text-secondary); }
-.product-meta { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
-.progress-bar { height: 3px; background: var(--color-background-secondary); border-radius: 2px; overflow: hidden; margin-top: 6px; }
-.progress-bar .fill { height: 100%; background: #2C2C2A; border-radius: 2px; transition: width 0.5s; }
+.product-img span { font-size: 9px; color: var(--text3); text-align: center; padding: 4px; font-family: 'IBM Plex Mono', monospace; }
+.product-name { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+.product-meta { font-size: 11px; color: var(--text2); font-family: 'IBM Plex Mono', monospace; }
+.product-tags { margin-top: 4px; display: flex; flex-wrap: wrap; gap: 4px; }
+.product-tag {
+  font-size: 10px; background: var(--bg4);
+  color: var(--text3); padding: 2px 7px;
+  border-radius: 20px; border: 1px solid var(--border);
+}
 
-/* Enrich panel */
-.enrich-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+/* Badges */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 9px; border-radius: 20px;
+  font-size: 11px; font-weight: 500;
+  font-family: 'IBM Plex Mono', monospace;
+  white-space: nowrap;
+}
+.badge-pending { background: var(--amber-bg); color: var(--amber); }
+.badge-enriched { background: var(--green-bg); color: var(--green); }
+.badge-error { background: var(--red-bg); color: var(--red); }
+.badge-processing { background: var(--blue-bg); color: var(--blue); }
+
+/* Enrich */
 .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
-.stat-card { background: var(--color-background-primary); border-radius: var(--border-radius-md); padding: 12px; border: 0.5px solid var(--color-border-tertiary); }
-.stat-card .num { font-size: 22px; font-weight: 500; }
-.stat-card .lbl { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
-.log-box { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 12px; font-family: var(--font-mono); font-size: 12px; height: 200px; overflow-y: auto; color: var(--color-text-secondary); }
-.log-entry { padding: 2px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
-.log-entry.ok { color: #3B6D11; }
-.log-entry.err { color: #A32D2D; }
-.log-entry.info { color: #185FA5; }
+.stat-card {
+  background: var(--bg2); border-radius: var(--radius);
+  padding: 14px; border: 1px solid var(--border);
+}
+.stat-num { font-size: 28px; font-weight: 600; letter-spacing: -1px; font-family: 'IBM Plex Mono', monospace; }
+.stat-lbl { font-size: 11px; color: var(--text2); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.4px; }
+.stat-green { color: var(--green); }
+.stat-blue { color: var(--blue); }
+.stat-red { color: var(--red); }
 
-/* Export panel */
+.features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; color: var(--text2); margin: 14px 0; }
+.feature-item { display: flex; gap: 8px; align-items: flex-start; }
+.feature-check { color: var(--green); margin-top: 1px; }
+
+.log-box {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 12px;
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+  height: 200px; overflow-y: auto; color: var(--text2);
+}
+.log-entry { padding: 2px 0; border-bottom: 1px solid var(--border); }
+.log-entry.ok { color: var(--green); }
+.log-entry.err { color: var(--red); }
+.log-entry.info { color: var(--blue); }
+.progress-bar { height: 4px; background: var(--bg4); border-radius: 2px; overflow: hidden; margin-top: 10px; }
+.progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.5s; }
+.progress-label { font-size: 11px; color: var(--text3); margin-top: 5px; font-family: 'IBM Plex Mono', monospace; }
+
+/* Export */
 .export-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.export-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 20px; }
-.export-card .plat-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-.plat-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-.export-card h3 { font-size: 15px; font-weight: 500; }
-.export-card p { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; }
+.export-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+.plat-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.plat-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; }
+.plat-name { font-size: 15px; font-weight: 600; }
+.plat-ver { font-size: 11px; color: var(--text3); font-family: 'IBM Plex Mono', monospace; }
 .field-list { margin: 12px 0; }
-.field-item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 12px; color: var(--color-text-secondary); }
-.field-item span { color: var(--color-text-primary); font-weight: 500; }
-.chk-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; font-size: 12px; color: var(--color-text-secondary); }
+.field-item {
+  display: flex; justify-content: space-between;
+  padding: 6px 0; border-bottom: 1px solid var(--border);
+  font-size: 11px; color: var(--text2);
+  font-family: 'IBM Plex Mono', monospace;
+}
+.field-item span { color: var(--accent); }
+.chk-row { display: flex; align-items: center; gap: 7px; margin-bottom: 7px; font-size: 12px; color: var(--text2); }
+.chk-row input { accent-color: var(--accent); }
+
+.empty-state { text-align: center; padding: 48px; color: var(--text3); font-size: 13px; }
+
+/* Enrich header */
+.enrich-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+.enrich-header h2 { font-size: 16px; font-weight: 600; }
+.enrich-header p { font-size: 12px; color: var(--text2); margin-top: 3px; }
+
+/* Summary */
+.summary-box {
+  margin-top: 16px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: var(--radius); padding: 14px;
+  font-size: 12px; color: var(--text2);
+}
+.summary-box h3 { font-size: 12px; font-weight: 600; margin-bottom: 8px; color: var(--text); text-transform: uppercase; letter-spacing: 0.4px; }
 </style>
+</head>
+<body>
 
-<div class="app">
-  <div class="header">
-    <div class="logo">
-      <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+<div class="header">
+  <div class="logo">
+    <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+  </div>
+  <span class="header-title">CatalogAI</span>
+  <span class="badge-beta">beta</span>
+  <div class="header-right">
+    <span class="header-count" id="headerCount">0 productos</span>
+    <button class="btn btn-sm" id="demoBtn">Cargar demo</button>
+    <button class="theme-btn" id="themeBtn" title="Cambiar tema">☀</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-tab="upload">1. Importar</div>
+  <div class="tab" data-tab="products">2. Catálogo</div>
+  <div class="tab" data-tab="enrich">3. Enriquecer con IA</div>
+  <div class="tab" data-tab="export">4. Exportar</div>
+</div>
+
+<div class="content">
+
+  <!-- IMPORTAR -->
+  <div class="panel active" id="tab-upload">
+    <div class="upload-zone" id="dropzone">
+      <div class="upload-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </div>
+      <h3>Arrastrá tu Excel o CSV acá</h3>
+      <p>o hacé clic para seleccionar el archivo</p>
+      <small>Formatos: .xlsx · .xls · .csv — Máx. 10MB</small>
+      <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" style="display:none">
+      <button class="btn btn-sm" style="margin-top:14px" onclick="document.getElementById('fileInput').click()">Seleccionar archivo</button>
     </div>
-    <h1>CatalogAI</h1>
-    <span>beta</span>
-    <div style="margin-left: auto; display: flex; gap: 8px; align-items: center;">
-      <span style="font-size: 12px; color: var(--color-text-secondary);">0 productos cargados</span>
-      <button class="btn btn-sm" id="demoBtn">Cargar demo</button>
+
+    <div class="mapping-section" id="mappingSection" style="display:none">
+      <h3>Mapeo de columnas</h3>
+      <p>Asociá las columnas de tu archivo con los campos del catálogo</p>
+      <div id="mappingRows"></div>
+      <div class="mapping-actions">
+        <button class="btn" onclick="resetUpload()">Cancelar</button>
+        <button class="btn btn-primary" onclick="importProducts()">Importar productos</button>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top:20px">
+      <h3>Columnas esperadas (mínimas)</h3>
+      <div class="tag-grid" id="colTags"></div>
     </div>
   </div>
 
-  <div class="tabs">
-    <div class="tab active" data-tab="upload">1. Importar</div>
-    <div class="tab" data-tab="products">2. Catálogo</div>
-    <div class="tab" data-tab="enrich">3. Enriquecer con IA</div>
-    <div class="tab" data-tab="export">4. Exportar</div>
+  <!-- CATÁLOGO -->
+  <div class="panel" id="tab-products">
+    <div class="toolbar">
+      <input type="text" class="search-input" placeholder="Buscar producto..." id="searchInput" oninput="filterProducts()">
+      <button class="btn btn-sm btn-primary" onclick="goTab('enrich'); updateEnrichStats()">Enriquecer con IA</button>
+    </div>
+    <div class="product-grid" id="productGrid">
+      <div class="empty-state">Importá un archivo en el paso anterior para ver los productos acá.</div>
+    </div>
   </div>
 
-  <div class="content">
-
-    <!-- IMPORT PANEL -->
-    <div class="panel active" id="tab-upload">
-      <div class="upload-zone" id="dropzone">
-        <div class="upload-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        </div>
-        <h3>Arrastrá tu Excel o CSV acá</h3>
-        <p>o hacé clic para seleccionar el archivo</p>
-        <p><small>Formatos soportados: .xlsx, .xls, .csv — Máx. 10MB</small></p>
-        <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" style="display:none">
-        <button class="btn btn-sm" style="margin-top: 12px;" onclick="document.getElementById('fileInput').click()">Seleccionar archivo</button>
+  <!-- ENRIQUECER -->
+  <div class="panel" id="tab-enrich">
+    <div class="enrich-header">
+      <div>
+        <h2>Enriquecimiento con IA</h2>
+        <p>Gemini busca categorías, mejora descripciones y genera tags SEO</p>
       </div>
-
-      <div class="mapping-section" id="mappingSection" style="display:none">
-        <h3>Mapeo de columnas</h3>
-        <p style="font-size:12px; color:var(--color-text-secondary); margin-bottom:12px;">Asociá las columnas de tu archivo con los campos del catálogo</p>
-        <div id="mappingRows"></div>
-        <div style="margin-top: 14px; display: flex; gap: 8px; justify-content: flex-end;">
-          <button class="btn" onclick="resetUpload()">Cancelar</button>
-          <button class="btn btn-dark" onclick="importProducts()">Importar productos</button>
-        </div>
-      </div>
-
-      <div style="margin-top: 20px; background: var(--color-background-primary); border-radius: var(--border-radius-lg); border: 0.5px solid var(--color-border-tertiary); padding: 16px;">
-        <h3 style="font-size:13px; font-weight:500; margin-bottom:10px;">Columnas esperadas (mínimas)</h3>
-        <div style="display: grid; grid-template-columns: repeat(3,1fr); gap: 6px;">
-          ${['nombre / name','SKU / código','precio','descripción (opcional)','categoría (opcional)','marca (opcional)'].map(f=>`<div style="font-size:12px; font-family:var(--font-mono); background:var(--color-background-secondary); padding:5px 8px; border-radius:6px; color:var(--color-text-secondary);">${f}</div>`).join('')}
-        </div>
-      </div>
+      <button class="btn btn-primary" id="startEnrichBtn" onclick="startEnrich()">Iniciar enriquecimiento</button>
     </div>
 
-    <!-- PRODUCTS PANEL -->
-    <div class="panel" id="tab-products">
-      <div class="toolbar">
-        <input type="text" placeholder="Buscar producto..." id="searchInput" oninput="filterProducts()">
-        <button class="btn btn-sm" onclick="selectAll()">Seleccionar todos</button>
-        <button class="btn btn-sm btn-dark" id="enrichSelectedBtn" onclick="goEnrich()">Enriquecer seleccionados ↗</button>
-      </div>
-      <div class="product-grid" id="productGrid">
-        <div style="text-align:center; padding:40px; color:var(--color-text-secondary); font-size:13px;">
-          Importá un archivo en el paso anterior para ver los productos acá.
-        </div>
-      </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num" id="statTotal">0</div><div class="stat-lbl">Total</div></div>
+      <div class="stat-card"><div class="stat-num stat-green" id="statDone">0</div><div class="stat-lbl">Enriquecidos</div></div>
+      <div class="stat-card"><div class="stat-num stat-blue" id="statProc">0</div><div class="stat-lbl">Procesando</div></div>
+      <div class="stat-card"><div class="stat-num stat-red" id="statErr">0</div><div class="stat-lbl">Errores</div></div>
     </div>
 
-    <!-- ENRICH PANEL -->
-    <div class="panel" id="tab-enrich">
-      <div class="enrich-header">
-        <div>
-          <h2 style="font-size:16px; font-weight:500;">Enriquecimiento con IA</h2>
-          <p style="font-size:12px; color:var(--color-text-secondary); margin-top:2px;">La IA busca imágenes, categorías y mejora las descripciones</p>
-        </div>
-        <button class="btn btn-dark" id="startEnrichBtn" onclick="startEnrich()">Iniciar enriquecimiento</button>
-      </div>
-
-      <div class="stats-row">
-        <div class="stat-card"><div class="num" id="statTotal">0</div><div class="lbl">Total</div></div>
-        <div class="stat-card"><div class="num" style="color:#3B6D11" id="statDone">0</div><div class="lbl">Enriquecidos</div></div>
-        <div class="stat-card"><div class="num" style="color:#185FA5" id="statProc">0</div><div class="lbl">Procesando</div></div>
-        <div class="stat-card"><div class="num" style="color:#A32D2D" id="statErr">0</div><div class="lbl">Con error</div></div>
-      </div>
-
-      <div style="background:var(--color-background-primary); border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-lg); padding:14px; margin-bottom:14px;">
-        <h3 style="font-size:13px; font-weight:500; margin-bottom:10px;">Qué hace la IA por cada producto</h3>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:12px; color:var(--color-text-secondary);">
-          ${['Busca y asigna imagen representativa','Sugiere categoría y subcategoría','Mejora la descripción en español','Detecta atributos: color, talla, material','Genera tags para SEO','Calcula peso/dimensiones estimados'].map(i=>`<div style="display:flex;gap:6px;align-items:flex-start;"><span style="color:#3B6D11;margin-top:1px;">✓</span>${i}</div>`).join('')}
-        </div>
-      </div>
-
-      <div class="log-box" id="logBox">
-        <div style="color:var(--color-text-tertiary); font-size:11px;">El log de enriquecimiento aparecerá acá...</div>
-      </div>
-
-      <div style="margin-top:12px;">
-        <div class="progress-bar" style="height:5px;">
-          <div class="fill" id="enrichProgress" style="width:0%"></div>
-        </div>
-        <div style="font-size:11px; color:var(--color-text-secondary); margin-top:4px;" id="progressLabel">0 de 0 productos</div>
-      </div>
+    <div class="card" style="margin-bottom:16px">
+      <h3 style="font-size:12px;font-weight:600;margin-bottom:10px;color:var(--text2);text-transform:uppercase;letter-spacing:0.4px">Qué hace la IA por cada producto</h3>
+      <div class="features-grid" id="featureGrid"></div>
     </div>
 
-    <!-- EXPORT PANEL -->
-    <div class="panel" id="tab-export">
-      <div class="export-grid">
-        <div class="export-card">
-          <div class="plat-header">
-            <div class="plat-icon" style="background:#714B67; color:white; font-size:13px; font-weight:700;">O</div>
-            <div><h3>Odoo</h3><p style="margin:0; font-size:11px; color:var(--color-text-secondary);">v16 · v17 · v18</p></div>
-          </div>
-          <div class="field-list">
-            <div class="field-item">product.name <span>nombre</span></div>
-            <div class="field-item">default_code <span>SKU</span></div>
-            <div class="field-item">list_price <span>precio</span></div>
-            <div class="field-item">categ_id <span>categoría</span></div>
-            <div class="field-item">description_sale <span>descripción</span></div>
-            <div class="field-item">image_1920 <span>imagen (base64)</span></div>
-          </div>
-          <div class="field-list" style="border-top:0.5px solid var(--color-border-tertiary); padding-top:10px;">
-            <div class="chk-row"><input type="checkbox" checked> Incluir variantes de producto</div>
-            <div class="chk-row"><input type="checkbox" checked> Incluir imágenes en base64</div>
-            <div class="chk-row"><input type="checkbox"> Exportar como plantilla de importación</div>
-          </div>
-          <button class="btn btn-dark" style="width:100%; margin-top:12px;" onclick="exportOdoo()">Exportar CSV para Odoo</button>
-        </div>
-
-        <div class="export-card">
-          <div class="plat-header">
-            <div class="plat-icon" style="background:#96BF48; color:white; font-size:13px; font-weight:700;">S</div>
-            <div><h3>Shopify</h3><p style="margin:0; font-size:11px; color:var(--color-text-secondary);">Products CSV format</p></div>
-          </div>
-          <div class="field-list">
-            <div class="field-item">Title <span>nombre</span></div>
-            <div class="field-item">Variant SKU <span>SKU</span></div>
-            <div class="field-item">Variant Price <span>precio</span></div>
-            <div class="field-item">Type <span>categoría</span></div>
-            <div class="field-item">Body (HTML) <span>descripción</span></div>
-            <div class="field-item">Image Src <span>URL imagen</span></div>
-          </div>
-          <div class="field-list" style="border-top:0.5px solid var(--color-border-tertiary); padding-top:10px;">
-            <div class="chk-row"><input type="checkbox" checked> Incluir variantes</div>
-            <div class="chk-row"><input type="checkbox" checked> Generar handle desde nombre</div>
-            <div class="chk-row"><input type="checkbox"> Incluir metafields SEO</div>
-          </div>
-          <button class="btn btn-dark" style="width:100%; margin-top:12px;" onclick="exportShopify()">Exportar CSV para Shopify</button>
-        </div>
-      </div>
-
-      <div style="margin-top:16px; background:var(--color-background-primary); border:0.5px solid var(--color-border-tertiary); border-radius:var(--border-radius-lg); padding:14px;">
-        <h3 style="font-size:13px; font-weight:500; margin-bottom:8px;">Resumen de exportación</h3>
-        <div id="exportSummary" style="font-size:12px; color:var(--color-text-secondary);">Importá y enriquecé productos para ver el resumen acá.</div>
-      </div>
+    <div class="log-box" id="logBox">
+      <div style="color:var(--text3)">El log aparecerá acá cuando iniciés el enriquecimiento...</div>
     </div>
-
+    <div class="progress-bar"><div class="progress-fill" id="enrichProgress" style="width:0%"></div></div>
+    <div class="progress-label" id="progressLabel">0 de 0 productos</div>
   </div>
+
+  <!-- EXPORTAR -->
+  <div class="panel" id="tab-export">
+    <div class="export-grid">
+      <div class="export-card">
+        <div class="plat-header">
+          <div class="plat-icon" style="background:#714B67;color:white">O</div>
+          <div><div class="plat-name">Odoo</div><div class="plat-ver">v16 · v17 · v18</div></div>
+        </div>
+        <div class="field-list">
+          <div class="field-item">product.name <span>nombre</span></div>
+          <div class="field-item">default_code <span>SKU</span></div>
+          <div class="field-item">list_price <span>precio</span></div>
+          <div class="field-item">categ_id <span>categoría</span></div>
+          <div class="field-item">description_sale <span>descripción</span></div>
+        </div>
+        <div class="field-list" style="padding-top:10px;border-top:1px solid var(--border)">
+          <div class="chk-row"><input type="checkbox" checked> Incluir variantes</div>
+          <div class="chk-row"><input type="checkbox" checked> Formato de importación nativa</div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;margin-top:12px" onclick="exportOdoo()">Exportar CSV para Odoo</button>
+      </div>
+
+      <div class="export-card">
+        <div class="plat-header">
+          <div class="plat-icon" style="background:#96BF48;color:white">S</div>
+          <div><div class="plat-name">Shopify</div><div class="plat-ver">Products CSV format</div></div>
+        </div>
+        <div class="field-list">
+          <div class="field-item">Title <span>nombre</span></div>
+          <div class="field-item">Variant SKU <span>SKU</span></div>
+          <div class="field-item">Variant Price <span>precio</span></div>
+          <div class="field-item">Type <span>categoría</span></div>
+          <div class="field-item">Body (HTML) <span>descripción</span></div>
+        </div>
+        <div class="field-list" style="padding-top:10px;border-top:1px solid var(--border)">
+          <div class="chk-row"><input type="checkbox" checked> Generar handle desde nombre</div>
+          <div class="chk-row"><input type="checkbox"> Incluir metafields SEO</div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;margin-top:12px" onclick="exportShopify()">Exportar CSV para Shopify</button>
+      </div>
+    </div>
+
+    <div class="summary-box">
+      <h3>Resumen</h3>
+      <div id="exportSummary" style="color:var(--text2)">Importá y enriquecé productos para ver el resumen acá.</div>
+    </div>
+  </div>
+
 </div>
 
 <script>
 const FIELDS = ['nombre','sku','precio','descripcion','categoria','marca'];
 const FIELD_LABELS = {nombre:'Nombre',sku:'SKU / Código',precio:'Precio',descripcion:'Descripción',categoria:'Categoría',marca:'Marca'};
+const COLS = ['nombre / name','SKU / código','precio','descripción (opcional)','categoría (opcional)','marca (opcional)'];
+const FEATURES = ['Categoría y subcategoría jerárquica','Descripción persuasiva en español','Tags SEO optimizados','Atributos: color, talla, material','Palabras clave para buscadores','Compatible con Odoo y Shopify'];
+const SAMPLE_IMGS = [
+  'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=200&q=80',
+  'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=200&q=80',
+  'https://images.unsplash.com/photo-1595044426077-d36d9236d54a?w=200&q=80',
+  'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&q=80',
+  'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=200&q=80',
+  'https://images.unsplash.com/photo-1524678606370-a47ad25cb82a?w=200&q=80'
+];
+const DEMO = [
+  {id:1,nombre:'Silla Ergonómica Oslo',sku:'SIL-001',precio:89999,categoria:'Muebles > Oficina',marca:'ErgoDesign',status:'pending',img:null,desc:'Silla de oficina ergonómica con soporte lumbar ajustable.',tags:[]},
+  {id:2,nombre:'Monitor 27" 4K UltraSharp',sku:'MON-027',precio:349999,categoria:'Tecnología > Monitores',marca:'ViewMax',status:'pending',img:null,desc:'Monitor de alta resolución para profesionales.',tags:[]},
+  {id:3,nombre:'Teclado Mecánico Compact',sku:'TEC-088',precio:45000,categoria:'Tecnología > Periféricos',marca:'KeyCraft',status:'pending',img:null,desc:'Teclado mecánico compacto con switches silenciosos.',tags:[]},
+  {id:4,nombre:'Auriculares Noise Cancelling Pro',sku:'AUR-204',precio:129000,categoria:'Audio > Auriculares',marca:'SoundPro',status:'pending',img:null,desc:'Auriculares over-ear con cancelación activa de ruido.',tags:[]},
+  {id:5,nombre:'Lámpara de Escritorio LED',sku:'LAM-012',precio:18500,categoria:'Iluminación > Escritorio',marca:'LumiBright',status:'pending',img:null,desc:'Lámpara LED regulable con brazo articulado.',tags:[]},
+  {id:6,nombre:'Mouse Inalámbrico Silencioso',sku:'MOU-033',precio:22000,categoria:'Tecnología > Periféricos',marca:'ClickSoft',status:'pending',img:null,desc:'Mouse ergonómico inalámbrico con botones silenciosos.',tags:[]}
+];
+
 let products = [];
 let enriching = false;
 
-// Tabs
-document.querySelectorAll('.tab').forEach(t => {
-  t.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
-    t.classList.add('active');
-    document.getElementById('tab-' + t.dataset.tab).classList.add('active');
-  });
+// Init static content
+document.getElementById('colTags').innerHTML = COLS.map(function(c){ return '<span class="tag">'+c+'</span>'; }).join('');
+document.getElementById('featureGrid').innerHTML = FEATURES.map(function(f){ return '<div class="feature-item"><span class="feature-check">✓</span>'+f+'</div>'; }).join('');
+
+// Theme toggle
+var theme = localStorage.getItem('theme') || 'dark';
+document.documentElement.setAttribute('data-theme', theme);
+document.getElementById('themeBtn').textContent = theme === 'dark' ? '☀' : '☾';
+document.getElementById('themeBtn').addEventListener('click', function(){
+  theme = theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('theme', theme);
+  this.textContent = theme === 'dark' ? '☀' : '☾';
 });
 
-function goTab(name) {
-  document.querySelectorAll('.tab').forEach(t => {
-    t.classList.toggle('active', t.dataset.tab === name);
-  });
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
+// Tabs
+document.querySelectorAll('.tab').forEach(function(t){
+  t.addEventListener('click', function(){ goTab(t.dataset.tab); });
+});
+function goTab(name){
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('active', t.dataset.tab === name); });
+  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+  document.getElementById('tab-'+name).classList.add('active');
 }
 
 // Upload
-const dropzone = document.getElementById('dropzone');
-const fileInput = document.getElementById('fileInput');
+var dropzone = document.getElementById('dropzone');
+var fileInput = document.getElementById('fileInput');
+dropzone.addEventListener('dragover', function(e){ e.preventDefault(); dropzone.classList.add('drag'); });
+dropzone.addEventListener('dragleave', function(){ dropzone.classList.remove('drag'); });
+dropzone.addEventListener('drop', function(e){ e.preventDefault(); dropzone.classList.remove('drag'); handleFile(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', function(e){ handleFile(e.target.files[0]); });
+dropzone.addEventListener('click', function(){ fileInput.click(); });
 
-dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag'); });
-dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
-dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.classList.remove('drag'); handleFile(e.dataTransfer.files[0]); });
-fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
-dropzone.addEventListener('click', () => fileInput.click());
-
-function handleFile(file) {
-  if (!file) return;
-  const ext = file.name.split('.').pop().toLowerCase();
-  if (!['csv','xlsx','xls'].includes(ext)) { alert('Formato no soportado'); return; }
-  const reader = new FileReader();
-  reader.onload = e => {
-    const text = e.target.result;
-    const rows = text.split('\n').filter(r => r.trim());
-    const headers = rows[0].split(',').map(h => h.trim().replace(/"/g,''));
+function handleFile(file){
+  if(!file) return;
+  var ext = file.name.split('.').pop().toLowerCase();
+  if(!['csv','xlsx','xls'].includes(ext)){ alert('Formato no soportado'); return; }
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var rows = e.target.result.split('\n').filter(function(r){ return r.trim(); });
+    var headers = rows[0].split(',').map(function(h){ return h.trim().replace(/"/g,''); });
     showMapping(headers);
   };
   reader.readAsText(file);
 }
 
-function showMapping(headers) {
+function showMapping(headers){
   document.getElementById('mappingSection').style.display = 'block';
-  const container = document.getElementById('mappingRows');
-  container.innerHTML = FIELDS.map(f => `
-    <div class="map-row">
-      <div class="map-label">${FIELD_LABELS[f]}</div>
-      <div class="map-arrow">→</div>
-      <select class="map-select" id="map_${f}">
-        <option value="">— no mapear —</option>
-        ${headers.map(h => `<option value="${h}" ${h.toLowerCase().includes(f.substring(0,4)) ? 'selected' : ''}>${h}</option>`).join('')}
-      </select>
-    </div>
-  `).join('');
+  var html = '';
+  FIELDS.forEach(function(f){
+    var options = '<option value="">— no mapear —</option>';
+    headers.forEach(function(h){
+      var sel = h.toLowerCase().includes(f.substring(0,4)) ? ' selected' : '';
+      options += '<option value="'+h+'"'+sel+'>'+h+'</option>';
+    });
+    html += '<div class="map-row">';
+    html += '<div class="map-label">'+FIELD_LABELS[f]+'</div>';
+    html += '<div class="map-arrow">→</div>';
+    html += '<select class="map-select" id="map_'+f+'">'+options+'</select>';
+    html += '</div>';
+  });
+  document.getElementById('mappingRows').innerHTML = html;
 }
 
-function importProducts() {
+function importProducts(){
   document.getElementById('mappingSection').style.display = 'none';
-  loadDemoProducts(true);
+  loadDemo();
 }
-
-function resetUpload() {
+function resetUpload(){
   document.getElementById('mappingSection').style.display = 'none';
   fileInput.value = '';
 }
 
-// Demo products
-const demoData = [
-  { id:1, nombre:'Silla Ergonómica Oslo', sku:'SIL-001', precio:89999, categoria:'Muebles > Oficina', marca:'ErgoDesign', status:'pending', img:null, desc:'Silla de oficina ergonómica con soporte lumbar ajustable.', tags:[] },
-  { id:2, nombre:'Monitor 27" 4K UltraSharp', sku:'MON-027', precio:349999, categoria:'Tecnología > Monitores', marca:'ViewMax', status:'pending', img:null, desc:'Monitor de alta resolución para profesionales.', tags:[] },
-  { id:3, nombre:'Teclado Mecánico Compact', sku:'TEC-088', precio:45000, categoria:'Tecnología > Periféricos', marca:'KeyCraft', status:'pending', img:null, desc:'Teclado mecánico compacto con switches silenciosos.', tags:[] },
-  { id:4, nombre:'Auriculares Noise Cancelling Pro', sku:'AUR-204', precio:129000, categoria:'Audio > Auriculares', marca:'SoundPro', status:'pending', img:null, desc:'Auriculares over-ear con cancelación activa de ruido.', tags:[] },
-  { id:5, nombre:'Lámpara de Escritorio LED', sku:'LAM-012', precio:18500, categoria:'Iluminación > Escritorio', marca:'LumiBright', status:'pending', img:null, desc:'Lámpara LED regulable con brazo articulado.', tags:[] },
-  { id:6, nombre:'Mouse Inalámbrico Silencioso', sku:'MOU-033', precio:22000, categoria:'Tecnología > Periféricos', marca:'ClickSoft', status:'pending', img:null, desc:'Mouse ergonómico inalámbrico con botones silenciosos.', tags:[] },
-];
+document.getElementById('demoBtn').addEventListener('click', loadDemo);
 
-function loadDemoProducts(fromImport) {
-  products = JSON.parse(JSON.stringify(demoData));
+function loadDemo(){
+  products = JSON.parse(JSON.stringify(DEMO));
   renderProducts();
   updateHeader();
   updateExportSummary();
   goTab('products');
 }
 
-document.getElementById('demoBtn').addEventListener('click', () => loadDemoProducts(false));
-
-function renderProducts() {
-  const grid = document.getElementById('productGrid');
-  const q = (document.getElementById('searchInput').value || '').toLowerCase();
-  const filtered = products.filter(p => p.nombre.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q));
-  if (!filtered.length) { grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--color-text-secondary);font-size:13px;">Sin resultados</div>'; return; }
-  grid.innerHTML = filtered.map(p => `
-    <div class="product-card" id="pc_${p.id}">
-      <div class="product-img">
-        ${p.img ? `<img src="${p.img}" onerror="this.style.display='none'">` : `<span style="font-size:9px;text-align:center;padding:4px;">sin imagen</span>`}
-      </div>
-      <div class="product-info">
-        <h4>${p.nombre}</h4>
-        <p>${p.sku} · ${p.categoria} · $${p.precio.toLocaleString('es-AR')}</p>
-        ${p.tags.length ? `<p style="margin-top:3px;">${p.tags.map(t=>`<span style="font-size:10px;background:var(--color-background-secondary);padding:1px 6px;border-radius:20px;margin-right:3px;">${t}</span>`).join('')}</p>` : ''}
-      </div>
-      <div class="product-meta">
-        <span class="badge badge-${p.status === 'pending' ? 'pending' : p.status === 'enriched' ? 'enriched' : p.status === 'processing' ? 'processing' : 'error'}">
-          ${p.status === 'pending' ? 'Pendiente' : p.status === 'enriched' ? 'Enriquecido' : p.status === 'processing' ? 'Procesando...' : 'Error'}
-        </span>
-      </div>
-    </div>
-  `).join('');
+function renderProducts(){
+  var q = (document.getElementById('searchInput').value || '').toLowerCase();
+  var filtered = products.filter(function(p){ return p.nombre.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q); });
+  if(!filtered.length){
+    document.getElementById('productGrid').innerHTML = '<div class="empty-state">Sin resultados</div>';
+    return;
+  }
+  var html = '';
+  filtered.forEach(function(p){
+    var badgeClass = 'badge-'+({'pending':'pending','enriched':'enriched','processing':'processing','error':'error'}[p.status]||'pending');
+    var badgeLabel = {'pending':'Pendiente','enriched':'Enriquecido','processing':'Procesando...','error':'Error'}[p.status]||'Pendiente';
+    var imgHtml = p.img
+      ? '<img src="'+p.img+'" onerror="this.style.display=\'none\'">'
+      : '<span>sin imagen</span>';
+    var tagsHtml = p.tags.length
+      ? '<div class="product-tags">'+p.tags.map(function(t){ return '<span class="product-tag">'+t+'</span>'; }).join('')+'</div>'
+      : '';
+    html += '<div class="product-card" id="pc_'+p.id+'">';
+    html += '<div class="product-img">'+imgHtml+'</div>';
+    html += '<div><div class="product-name">'+p.nombre+'</div>';
+    html += '<div class="product-meta">'+p.sku+' &middot; '+p.categoria+' &middot; $'+p.precio.toLocaleString('es-AR')+'</div>';
+    html += tagsHtml+'</div>';
+    html += '<div><span class="badge '+badgeClass+'">'+badgeLabel+'</span></div>';
+    html += '</div>';
+  });
+  document.getElementById('productGrid').innerHTML = html;
 }
 
-function filterProducts() { renderProducts(); }
-function selectAll() { goEnrich(); }
-function goEnrich() { goTab('enrich'); updateEnrichStats(); }
+function filterProducts(){ renderProducts(); }
 
-function updateHeader() {
-  document.querySelector('.header span:last-child') && null;
-  const sp = document.querySelector('.header div[style*="margin-left"]');
-  if (sp) sp.querySelector('span').textContent = products.length + ' productos cargados';
+function updateHeader(){
+  document.getElementById('headerCount').textContent = products.length + ' productos';
 }
 
-function updateEnrichStats() {
+function updateEnrichStats(){
   document.getElementById('statTotal').textContent = products.length;
-  document.getElementById('statDone').textContent = products.filter(p=>p.status==='enriched').length;
-  document.getElementById('statProc').textContent = products.filter(p=>p.status==='processing').length;
-  document.getElementById('statErr').textContent = products.filter(p=>p.status==='error').length;
-  const done = products.filter(p=>p.status==='enriched').length;
-  const pct = products.length ? Math.round((done/products.length)*100) : 0;
+  var done = products.filter(function(p){ return p.status === 'enriched'; }).length;
+  var proc = products.filter(function(p){ return p.status === 'processing'; }).length;
+  var err = products.filter(function(p){ return p.status === 'error'; }).length;
+  document.getElementById('statDone').textContent = done;
+  document.getElementById('statProc').textContent = proc;
+  document.getElementById('statErr').textContent = err;
+  var pct = products.length ? Math.round((done/products.length)*100) : 0;
   document.getElementById('enrichProgress').style.width = pct + '%';
   document.getElementById('progressLabel').textContent = done + ' de ' + products.length + ' productos (' + pct + '%)';
 }
 
-function addLog(msg, type='info') {
-  const box = document.getElementById('logBox');
-  const el = document.createElement('div');
+function addLog(msg, type){
+  type = type || 'info';
+  var box = document.getElementById('logBox');
+  if(box.children[0] && box.children[0].style && !box.children[0].className.includes('log-entry')){
+    box.innerHTML = '';
+  }
+  var el = document.createElement('div');
   el.className = 'log-entry ' + type;
-  const now = new Date();
-  const ts = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0') + ':' + now.getSeconds().toString().padStart(2,'0');
-  el.textContent = '[' + ts + '] ' + msg;
-  if (box.children[0] && box.children[0].style.color) box.innerHTML = '';
+  var now = new Date();
+  var ts = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0');
+  el.textContent = '['+ts+'] '+msg;
   box.appendChild(el);
   box.scrollTop = box.scrollHeight;
 }
 
-const sampleImages = [
-  'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=200&q=80',
-  'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=200&q=80',
-  'https://images.unsplash.com/photo-1595044426077-d36d9236d54a?w=200&q=80',
-  'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&q=80',
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80',
-  'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=200&q=80',
-];
+function sleep(ms){ return new Promise(function(r){ setTimeout(r,ms); }); }
 
-const sampleTags = [
-  ['ergonómico','oficina','lumbar','ajustable'],
-  ['4K','UHD','IPS','profesional'],
-  ['mecánico','switches','compacto','silencioso'],
-  ['noise-cancelling','bluetooth','premium','over-ear'],
-  ['LED','regulable','articulado','bajo consumo'],
-  ['inalámbrico','silencioso','ergonómico','USB'],
-];
-
-async function startEnrich() {
-  if (!products.length) { addLog('No hay productos cargados.', 'err'); return; }
-  if (enriching) return;
+async function startEnrich(){
+  if(!products.length){ addLog('No hay productos cargados.','err'); return; }
+  if(enriching) return;
   enriching = true;
-  document.getElementById('startEnrichBtn').disabled = true;
-  document.getElementById('startEnrichBtn').textContent = 'Procesando...';
+  var btn = document.getElementById('startEnrichBtn');
+  btn.disabled = true;
+  btn.textContent = 'Procesando...';
+  addLog('Iniciando enriquecimiento de '+products.length+' productos con Gemini...','info');
 
-  addLog('Iniciando enriquecimiento de ' + products.length + ' productos con IA...', 'info');
-
-  for (let i = 0; i < products.length; i++) {
-    const p = products[i];
+  for(var i=0; i<products.length; i++){
+    var p = products[i];
     p.status = 'processing';
     renderProducts();
     updateEnrichStats();
-    addLog('Procesando: ' + p.nombre + ' (' + p.sku + ')', 'info');
-    await sleep(900);
-
+    addLog('Procesando: '+p.nombre+' ('+p.sku+')','info');
+    await sleep(800);
     try {
-      const result = await callAI(p);
+      var result = await callAI(p);
       p.categoria = result.categoria || p.categoria;
       p.desc = result.descripcion || p.desc;
       p.tags = result.tags || [];
-      p.img = sampleImages[i % sampleImages.length];
+      p.img = SAMPLE_IMGS[i % SAMPLE_IMGS.length];
       p.status = 'enriched';
-      addLog('OK ' + p.nombre + ' — categoría: ' + p.categoria, 'ok');
+      addLog('OK ' + p.nombre + ' — ' + p.categoria, 'ok');
     } catch(e) {
       p.status = 'error';
-      addLog('Error procesando ' + p.nombre + ': ' + e.message, 'err');
+      addLog('Error: '+p.nombre+' — '+e.message,'err');
     }
-
     renderProducts();
     updateEnrichStats();
-    await sleep(300);
+    await sleep(200);
   }
 
-  addLog('Enriquecimiento completado. ' + products.filter(p=>p.status==='enriched').length + ' productos listos para exportar.', 'ok');
+  addLog('Listo. '+products.filter(function(p){ return p.status==='enriched'; }).length+' productos enriquecidos.','ok');
   enriching = false;
-  document.getElementById('startEnrichBtn').disabled = false;
-  document.getElementById('startEnrichBtn').textContent = 'Iniciar enriquecimiento';
+  btn.disabled = false;
+  btn.textContent = 'Iniciar enriquecimiento';
   updateExportSummary();
 }
 
-async function callAI(product) {
-  try {
-    const response = await fetch('/api/proxy', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messages: [{
-          role: 'user',
-          content: `Sos un experto en ecommerce latinoamericano. Para el siguiente producto, devolvé SOLO un JSON válido (sin markdown, sin texto extra) con:
-- "categoria": categoría > subcategoría en español (ej: "Tecnología > Monitores")
-- "descripcion": descripción de venta en español, 2 frases, orientada al cliente, persuasiva
-- "tags": array de 4-5 palabras clave SEO en español
-
-Producto: ${product.nombre}
-SKU: ${product.sku}
-Descripción actual: ${product.desc}
-Precio: $${product.precio}`
-        }]
-      })
-    });
-    const data = await response.json();
-    const text = data.content[0].text;
-    const clean = text.replace(/\`\`\`json|\`\`\`/g, '').trim();
-    return JSON.parse(clean);
-  } catch(e) {
-    throw new Error(e.message);
-  }
-}
-
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-function generateCSVOdoo() {
-  const headers = ['product.name','default_code','list_price','categ_id','description_sale','active'];
-  const rows = products.filter(p=>p.status==='enriched').map(p => [
-    '"' + p.nombre + '"', p.sku, p.precio, '"' + p.categoria + '"', '"' + p.desc + '"', 'True'
-  ]);
-  return [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-}
-
-function generateCSVShopify() {
-  const headers = ['Handle','Title','Body (HTML)','Vendor','Type','Tags','Variant SKU','Variant Price','Image Src'];
-  const rows = products.filter(p=>p.status==='enriched').map(p => {
-    const handle = p.nombre.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-    return [handle, '"' + p.nombre + '"', '"<p>' + p.desc + '</p>"', p.marca, '"' + p.categoria.split('>')[0].trim() + '"', '"' + p.tags.join(', ') + '"', p.sku, p.precio, p.img || ''].join(',');
+async function callAI(product){
+  var response = await fetch('/api/proxy', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      messages: [{
+        role: 'user',
+        content: 'Sos un experto en ecommerce latinoamericano. Para el siguiente producto, devolvé SOLO un JSON valido (sin markdown, sin texto extra) con: "categoria" (categoria > subcategoria en español), "descripcion" (2 frases persuasivas para el cliente), "tags" (array de 4-5 palabras clave SEO en español). Producto: '+product.nombre+'. SKU: '+product.sku+'. Descripcion actual: '+product.desc+'. Precio: $'+product.precio
+      }]
+    })
   });
-  return [headers.join(','), ...rows.map(r => r)].join('\n');
+  var data = await response.json();
+  var text = data.content[0].text;
+  var clean = text.replace(/```json|```/g,'').trim();
+  return JSON.parse(clean);
 }
 
-function downloadCSV(content, filename) {
-  const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+function generateCSVOdoo(){
+  var headers = ['product.name','default_code','list_price','categ_id','description_sale','active'];
+  var rows = products.filter(function(p){ return p.status==='enriched'; }).map(function(p){
+    return ['"'+p.nombre+'"',p.sku,p.precio,'"'+p.categoria+'"','"'+p.desc+'"','True'].join(',');
+  });
+  return [headers.join(',')].concat(rows).join('\n');
+}
+
+function generateCSVShopify(){
+  var headers = ['Handle','Title','Body (HTML)','Vendor','Type','Tags','Variant SKU','Variant Price'];
+  var rows = products.filter(function(p){ return p.status==='enriched'; }).map(function(p){
+    var handle = p.nombre.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    return [handle,'"'+p.nombre+'"','"<p>'+p.desc+'</p>"',p.marca,'"'+p.categoria.split('>')[0].trim()+'"','"'+p.tags.join(', ')+'"',p.sku,p.precio].join(',');
+  });
+  return [headers.join(',')].concat(rows).join('\n');
+}
+
+function downloadCSV(content, filename){
+  var blob = new Blob([content],{type:'text/csv;charset=utf-8;'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
   URL.revokeObjectURL(url);
 }
 
-function exportOdoo() {
-  const enriched = products.filter(p=>p.status==='enriched');
-  if (!enriched.length) { alert('No hay productos enriquecidos aún. Completá el paso 3 primero.'); return; }
-  downloadCSV(generateCSVOdoo(), 'productos_odoo.csv');
+function exportOdoo(){
+  var enriched = products.filter(function(p){ return p.status==='enriched'; });
+  if(!enriched.length){ alert('No hay productos enriquecidos. Completá el paso 3 primero.'); return; }
+  downloadCSV(generateCSVOdoo(),'productos_odoo.csv');
 }
 
-function exportShopify() {
-  const enriched = products.filter(p=>p.status==='enriched');
-  if (!enriched.length) { alert('No hay productos enriquecidos aún. Completá el paso 3 primero.'); return; }
-  downloadCSV(generateCSVShopify(), 'productos_shopify.csv');
+function exportShopify(){
+  var enriched = products.filter(function(p){ return p.status==='enriched'; });
+  if(!enriched.length){ alert('No hay productos enriquecidos. Completá el paso 3 primero.'); return; }
+  downloadCSV(generateCSVShopify(),'productos_shopify.csv');
 }
 
-function updateExportSummary() {
-  const enriched = products.filter(p=>p.status==='enriched').length;
-  document.getElementById('exportSummary').innerHTML = enriched
-    ? `<b>${enriched}</b> de <b>${products.length}</b> productos listos para exportar. Los archivos CSV son compatibles con la importación nativa de Odoo (v16/17/18) y Shopify (Products CSV).`
-    : 'Importá y enriquecé productos para ver el resumen acá.';
+function updateExportSummary(){
+  var enriched = products.filter(function(p){ return p.status==='enriched'; }).length;
+  var el = document.getElementById('exportSummary');
+  if(enriched){
+    el.innerHTML = '<strong>'+enriched+'</strong> de <strong>'+products.length+'</strong> productos listos para exportar.';
+  } else {
+    el.textContent = 'Importá y enriquecé productos para ver el resumen acá.';
+  }
 }
 </script>
+</body>
+</html>
